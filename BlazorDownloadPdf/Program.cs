@@ -1,13 +1,14 @@
-using BlazorDownloadPdf.Data;
-using Microsoft.AspNetCore.Components;
-using Microsoft.AspNetCore.Components.Web;
-
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddRazorPages();
 builder.Services.AddServerSideBlazor();
 builder.Services.AddSingleton<WeatherForecastService>();
+
+builder.Services.AddScoped<IInvoiceService, InvoiceService>();
+
+builder.Services.AddDbContext<InvoiceContext>(o => o.UseSqlServer(builder.Configuration.GetConnectionString("SendSms"),
+    s => s.CommandTimeout(100)));
 
 var app = builder.Build();
 

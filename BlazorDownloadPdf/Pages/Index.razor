@@ -1,9 +1,60 @@
 ﻿@page "/"
+@inject BlazorDownloadPdf.Repository.IInvoiceService invoiceService
+@inject IJSRuntime jsRunTime
 
-<PageTitle>Index</PageTitle>
+@code 
+{
+    Invoice invoice = new Invoice();
+    List<Invoice> invoices = new List<Invoice>();
+    IFileListEntry file; 
 
-<h1>Hello, world!</h1>
+    protected override async Task OnInitializedAsync()
+    {
 
-Welcome to your new app.
+    }
 
-<SurveyPrompt Title="How is Blazor working for you?" />
+    private void GetAllInvoices()
+    {
+        invoices = invoiceService.GetInvoices();
+    }
+
+    private void AddNew()
+    {
+        invoice = new Invoice();
+    }
+
+    private void SaveInvoice()
+    {
+        invoiceService.Save(invoice);
+        invoice = new Invoice();
+        GetAllInvoices();
+    }
+
+    async void HandleFileSelected(IFileListEntry[] files, int invoiceId)
+    {
+        var attch = await FileSender(files.FirstOrDefault());
+        invoiceService.UploadPdf(invoiceId, attch);
+    }
+
+    public async Task<byte[]> FileSender(IFileListEntry file)
+    {
+        using (var ms = new System.IO.MemoryStream())
+        {
+            await file.Data.CopyToAsync(ms);
+            return ms.ToArray();
+        }
+    }
+
+    private void DeletePdf(int invoiceId)
+    {
+        invoiceService.DeletePdf(invoiceId);
+        GetAllInvoices();
+    }
+
+    private void DownLoadPdf(int invoiceId)
+    {
+        var invoice = invoices.FirstOrDefault(x => x.InvoiceId == invoiceId);
+        jsRunTime.InvokeVoidAsync("saveAsFile", "PdfFileName1", invoice.Attachment);
+        GetAllInvoices();
+    }
+}
