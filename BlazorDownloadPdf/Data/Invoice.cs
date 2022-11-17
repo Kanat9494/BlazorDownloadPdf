@@ -7,5 +7,5 @@ public class Invoice
     public int Number { get; set; }
     public DateTime Date { get; set; }
     public decimal Value { get; set; }
-    public byte[] Attachment { get; set; }
+    public byte[]? Attachment { get; set; }
 }
